@@ -1,0 +1,22 @@
+# HatCosmetics version: 1.0.0
+
+# Refer to Spigot-API Materials for list of items: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# Item used for all hats:
+item: FEATHER
+# Item used to border the hats in the GUI:
+border: LIGHT_BLUE_STAINED_GLASS_PANE
+
+# The number of hat rows in the GUI (must be between 1 and 4)
+# This is only for the actual hats and not the two rows for the border and close menu item
+gui_rows: 1
+
+# Create your hats here using this format:
+#
+# hats:
+#   staffHat:
+#     data: 1000101
+#     name: "&fStaff Hat"
+hats:
+  staffHat:
+    data: 1000101
+    name: "&fStaff Hat"

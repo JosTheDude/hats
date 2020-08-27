@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id "com.github.johnrengelman.shadow" version "6.0.0"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://hub.spigotmc.org/nexus/content/repositories/snapshots/')
+    }
+
+    maven {
+        url = uri('https://repo.codemc.org/repository/maven-public/')
+    }
+
+    maven {
+        url = uri('http://repo.maven.apache.org/maven2')
+    }
+}
+
+dependencies {
+    implementation 'de.tr7zw:item-nbt-api:2.5.0'
+    compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
+}
+
+group = 'me.Tonus_'
+version = '1.0.0'
+sourceCompatibility = '1.8'
+
+shadowJar {
+    minimize()
+    archiveClassifier.set("")
+    relocate('de.tr7zw', 'me.Tonus_.hatCosmetics.libs.de.tr7zw')
+}
+
+task copyToPluginsFolder(type: Copy) {
+    from shadowJar
+    into 'D:\\Documents\\Minecraft Stuff\\Minecraft Servers\\1.16.1 Plugin Dev Server\\plugins'
+}
