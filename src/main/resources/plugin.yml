@@ -16,3 +16,6 @@ permissions:
   hatcosmetics.hat:
     description: Allows use of hat in permission.
     default: op
+  hatcosmetics.unequip.other:
+    description: Allows sender to unequip hat from online player.
+    default: op
