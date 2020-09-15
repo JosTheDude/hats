@@ -27,6 +27,7 @@ import java.util.Objects;
 public class Main extends JavaPlugin implements Listener {
     public Inventory inv;
     public HashMap<Player, ItemStack> droppedCosmetic = new HashMap<>();
+    public static HashMap<String, ItemStack> hats = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -56,11 +57,66 @@ public class Main extends JavaPlugin implements Listener {
                 if(args[0].equalsIgnoreCase("help")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             "&8&m------------&8[ &3&lHats &8]&m------------\n"
-                                    + "&f/hats&7: Opens cosmetics GUI\n"
-                                    + "&f/hats unequip &8[player]&7: Unequips current cosmetic\n"
+                                    + "&f/hats&7: Opens hat GUI\n"
+                                    + "&f/hats equip <hat> &8[player]&7: Equips specified hat\n"
+                                    + "&f/hats unequip &8[player]&7: Unequips current hat\n"
                                     + "&f/hats help&7: Displays this text"));
                     if(sender.hasPermission("hatcosmetics.reload")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f/hats reload&7: Reloads plugin"));
-                } else if(args[0].equalsIgnoreCase("unequip")) {
+                }
+                else if(args[0].equalsIgnoreCase("equip")) {
+                    // Check if a hat is specified and if it exists
+                    if(!(args.length > 1)) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou must specify a hat to equip!"));
+                        return true;
+                    } else if(!hats.containsKey(args[1])) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bThat hat does not exist!"));
+                        return true;
+                    }
+                    Player player;
+                    if(args.length > 2) {
+                        if(!sender.hasPermission("hatcosmetics.equip.other")) {
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to do this."));
+                            return true;
+                        }
+                        player = getServer().getPlayer(args[2]);
+                        if(player == null || !player.isOnline()) {
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bThat player is not currently online!"));
+                            return true;
+                        }
+                    } else {
+                        if(!(sender instanceof Player)) {
+                            sender.sendMessage("You cannot do this in console!");
+                            return true;
+                        }
+                        player = (Player) sender;
+                    }
+                    if(player.getEquipment() == null) return true;
+
+                    // First check if the player has permission to the hat
+                    ItemStack item = hats.get(args[1]);
+                    NBTItem nbti = new NBTItem(item);
+                    if(!player.hasPermission(nbti.getString("permission"))) {
+                        if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b does not have permission to equip the hat."));
+                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to equip that hat."));
+                        return true;
+                    }
+
+                    // Then check if the player has a helmet equipped and cancel if so
+                    if (player.getEquipment().getHelmet() != null) {
+                        if (player.getEquipment().getHelmet().getItemMeta() != null || player.getEquipment().getHelmet().getItemMeta().getLore() != null ||
+                        !(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic"))) {
+                            if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b already has something on their head!"));
+                            else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bSomething else is already on your head!"));
+                            return true;
+                        }
+                    }
+
+                    // Set player's helmet slot to specified hat
+                    player.getEquipment().setHelmet(item);
+                    if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b equipped the hat successfully!"));
+                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou equipped your hat successfully!"));
+                }
+                else if(args[0].equalsIgnoreCase("unequip")) {
                     Player player;
                     if(args.length > 1) {
                         if(!sender.hasPermission("hatcosmetics.unequip.other")) {
@@ -90,9 +146,11 @@ public class Main extends JavaPlugin implements Listener {
                     }
                     if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b doesn't have a hat equipped!"));
                     else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou don't have a hat equipped!"));
-                } else if(args[0].equalsIgnoreCase("reload")) {
+                }
+                else if(args[0].equalsIgnoreCase("reload")) {
                     if(sender.hasPermission("hatcosmetics.reload")) {
                         this.reloadConfig();
+                        hats.clear();
                         createInv();
                         if(sender instanceof Player) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bPlugin has been reloaded!"));
                         getLogger().info("Plugin has been reloaded!");
@@ -275,6 +333,7 @@ public class Main extends JavaPlugin implements Listener {
             NBTItem nbti = new NBTItem(item);
             nbti.setString("permission", "hatcosmetics.hat." + cosmetics);
             item = nbti.getItem();
+            hats.put(cosmetics, item); // Will later be moved to reload for player specific GUIs
             inv.setItem(i, item);
             i++;
         }

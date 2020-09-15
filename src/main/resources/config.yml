@@ -1,4 +1,5 @@
-# HatCosmetics version: 1.1.0
+# HatCosmetics config version: 1
+# For both my sake and yours, please DO NOT change the config version!
 
 # Refer to Spigot-API Materials for list of items: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 # Item used for all hats:
