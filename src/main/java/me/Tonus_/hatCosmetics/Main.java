@@ -317,10 +317,18 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().severe("The hats section of the config is missing! Delete your file and restart the server to regenerate.");
             return;
         }
+
         for(String cosmetics : cosmeticsSection.getKeys(false)) {
+            String hatItem = getConfig().getString("hats." + cosmetics + ".item");
+            Material hatMaterial;
             if(i-8 > invRows*9) {
                 getLogger().warning("Hats are going beyond the GUI size! Please increase 'gui_rows' or reduce the amount of hats.");
                 return;
+            }
+            if(hatItem != null) {
+                hatMaterial = Material.matchMaterial(hatItem);
+                if(hatMaterial != null) item.setType(hatMaterial);
+                else getLogger().warning("The item '" + hatItem + "' is not a material! Please check Spigot-API materials.");
             }
             meta.setCustomModelData(getConfig().getInt("hats." + cosmetics + ".data"));
             String name = getConfig().getString("hats." + cosmetics + ".name");

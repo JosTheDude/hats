@@ -29,16 +29,11 @@ dependencies {
 }
 
 group = 'me.Tonus_'
-version = '1.1.0-b1'
+version = '1.1.0-b2'
 sourceCompatibility = '1.8'
 
 shadowJar {
     minimize()
     archiveClassifier.set("")
     relocate('de.tr7zw', 'me.Tonus_.hatCosmetics.libs.de.tr7zw')
-}
-
-task copyToPluginsFolder(type: Copy) {
-    from shadowJar
-    into 'D:\\Documents\\Minecraft Stuff\\Minecraft Servers\\1.16.1 Plugin Dev Server\\plugins'
 }
