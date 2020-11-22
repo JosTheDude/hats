@@ -8,6 +8,9 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +34,13 @@ public class Main extends JavaPlugin implements Listener {
     public HashMap<Player, ItemStack> droppedCosmetic = new HashMap<>();
     public static HashMap<String, ItemStack> hats = new HashMap<>();
 
+    private FileConfiguration messagesConfig;
+
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
         this.saveDefaultConfig();
+        createMessagesConfig();
         createInv();
         Objects.requireNonNull(this.getCommand("hatcosmetics")).setTabCompleter(new HatCosmeticTab());
     }
@@ -40,6 +48,25 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
 
+    }
+
+    public FileConfiguration getMessagesConfig() {
+        return this.messagesConfig;
+    }
+
+    private void createMessagesConfig() {
+        File messagesConfigFile = new File(getDataFolder(), "messages.yml");
+        if (!messagesConfigFile.exists()) {
+            messagesConfigFile.getParentFile().mkdirs();
+            saveResource("messages.yml", false);
+        }
+
+        messagesConfig= new YamlConfiguration();
+        try {
+            messagesConfig.load(messagesConfigFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -54,6 +81,7 @@ public class Main extends JavaPlugin implements Listener {
                 player.openInventory(inv);
                 return true;
             } else {
+                String header = this.getMessagesConfig().getString("prefix")+this.getMessagesConfig().getString("suffix");
                 if(args[0].equalsIgnoreCase("help")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             "&8&m------------&8[ &3&lHats &8]&m------------\n"
@@ -66,21 +94,21 @@ public class Main extends JavaPlugin implements Listener {
                 else if(args[0].equalsIgnoreCase("equip")) {
                     // Check if a hat is specified and if it exists
                     if(!(args.length > 1)) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou must specify a hat to equip!"));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_given")));
                         return true;
                     } else if(!hats.containsKey(args[1])) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bThat hat does not exist!"));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_not_exist")));
                         return true;
                     }
                     Player player;
                     if(args.length > 2) {
                         if(!sender.hasPermission("hatcosmetics.equip.other")) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to do this."));
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_permission")));
                             return true;
                         }
                         player = getServer().getPlayer(args[2]);
                         if(player == null || !player.isOnline()) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bThat player is not currently online!"));
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("not_online")));
                             return true;
                         }
                     } else {
@@ -96,8 +124,8 @@ public class Main extends JavaPlugin implements Listener {
                     ItemStack item = hats.get(args[1]);
                     NBTItem nbti = new NBTItem(item);
                     if(!player.hasPermission(nbti.getString("permission"))) {
-                        if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b does not have permission to equip the hat."));
-                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to equip that hat."));
+                        if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission_other")));
+                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
                         return true;
                     }
 
@@ -105,27 +133,27 @@ public class Main extends JavaPlugin implements Listener {
                     if (player.getEquipment().getHelmet() != null) {
                         if (player.getEquipment().getHelmet().getItemMeta() != null || player.getEquipment().getHelmet().getItemMeta().getLore() != null ||
                         !(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic"))) {
-                            if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b already has something on their head!"));
-                            else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bSomething else is already on your head!"));
+                            if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("helmet_exist_other")));
+                            else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("helmet_exist")));
                             return true;
                         }
                     }
 
                     // Set player's helmet slot to specified hat
                     player.getEquipment().setHelmet(item);
-                    if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b equipped the hat successfully!"));
-                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou equipped your hat successfully!"));
+                    if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success_other")));
+                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
                 }
                 else if(args[0].equalsIgnoreCase("unequip")) {
                     Player player;
                     if(args.length > 1) {
                         if(!sender.hasPermission("hatcosmetics.unequip.other")) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to do this."));
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_permission")));
                             return true;
                         }
                         player = getServer().getPlayer(args[1]);
                         if(player == null || !player.isOnline()) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bThat player is not currently online!"));
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("not_online")));
                             return true;
                         }
                     } else {
@@ -140,23 +168,24 @@ public class Main extends JavaPlugin implements Listener {
                     player.getEquipment().getHelmet().getItemMeta() == null || player.getEquipment().getHelmet().getItemMeta().getLore() == null) return true;
                     if(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
                         player.getEquipment().setHelmet(new ItemStack(Material.AIR));
-                        if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b's hat has been unequipped!"));
-                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYour hat has been unequipped!"));
+                        if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success_other")));
+                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
                         return true;
                     }
-                    if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &b" + player.getName() + "&b doesn't have a hat equipped!"));
-                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou don't have a hat equipped!"));
+                    if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_other")));
+                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat")));
                 }
                 else if(args[0].equalsIgnoreCase("reload")) {
                     if(sender.hasPermission("hatcosmetics.reload")) {
                         this.reloadConfig();
+                        createMessagesConfig();
                         hats.clear();
                         createInv();
-                        if(sender instanceof Player) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bPlugin has been reloaded!"));
+                        if(sender instanceof Player) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("plugin_reload")));
                         getLogger().info("Plugin has been reloaded!");
                         return true;
                     }
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to do this."));
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_permission")));
                 }
             }
         }
@@ -221,12 +250,13 @@ public class Main extends JavaPlugin implements Listener {
 
             if(event.getSlot() >= 9 && event.getSlot() < event.getInventory().getSize()-9 && event.getCurrentItem().getItemMeta().getLore() != null &&
             event.getCurrentItem().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                String header = this.getMessagesConfig().getString("prefix")+this.getMessagesConfig().getString("suffix");
                 helmCheck: {
                     if (player.getEquipment() != null && player.getEquipment().getHelmet() != null) {
                         if (player.getEquipment().getHelmet().getItemMeta() != null && player.getEquipment().getHelmet().getItemMeta().getLore() != null &&
                                 player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic"))
                             break helmCheck;
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bSomething else is already on your head!"));
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("helmet_exist")));
                         player.closeInventory();
                         return;
                     }
@@ -241,11 +271,11 @@ public class Main extends JavaPlugin implements Listener {
                     item.setItemMeta(meta);
 
                     player.getEquipment().setHelmet(item);
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYour hat was equipped successfully!"));
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
                     player.closeInventory();
                     return;
                 }
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&3&lHats >> &bYou do not have permission to equip this hat!"));
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
             } else if(event.getSlot() == event.getInventory().getSize()-5 && event.getCurrentItem().getType().equals(Material.BARRIER) && event.getCurrentItem().getItemMeta().getDisplayName().contains("Close Menu")) {
                 player.closeInventory();
             }

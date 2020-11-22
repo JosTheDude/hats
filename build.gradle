@@ -24,8 +24,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'de.tr7zw:item-nbt-api:2.5.0'
-    compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
+    implementation 'de.tr7zw:item-nbt-api:2.6.0'
+    compileOnly 'org.spigotmc:spigot-api:1.16.4-R0.1-SNAPSHOT'
 }
 
 group = 'me.Tonus_'
