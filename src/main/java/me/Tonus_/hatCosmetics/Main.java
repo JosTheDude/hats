@@ -123,7 +123,8 @@ public class Main extends JavaPlugin implements Listener {
                     // First check if the player has permission to the hat
                     ItemStack item = hats.get(args[1]);
                     NBTItem nbti = new NBTItem(item);
-                    if(!player.hasPermission(nbti.getString("permission"))) {
+                    if(!player.hasPermission(nbti.getString("Permission"))) {
+                        player.sendMessage(nbti.toString());
                         if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission_other")));
                         else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
                         return true;
@@ -140,6 +141,12 @@ public class Main extends JavaPlugin implements Listener {
                     }
 
                     // Set player's helmet slot to specified hat
+                    ItemMeta meta = item.getItemMeta();
+                    List<String> lore = new ArrayList<>();
+                    lore.add(ChatColor.GRAY + "Hat Cosmetic");
+                    assert meta != null;
+                    meta.setLore(lore);
+                    item.setItemMeta(meta);
                     player.getEquipment().setHelmet(item);
                     if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success_other")));
                     else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
@@ -263,7 +270,7 @@ public class Main extends JavaPlugin implements Listener {
                 }
                 ItemStack item = event.getCurrentItem();
                 NBTItem nbti = new NBTItem(item);
-                if(player.hasPermission(nbti.getString("permission"))) {
+                if(player.hasPermission(nbti.getString("Permission"))) {
                     ItemMeta meta = item.getItemMeta();
                     List<String> lore = new ArrayList<>();
                     lore.add(ChatColor.GRAY + "Hat Cosmetic");
@@ -318,10 +325,11 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         // Create close menu item
-        item.setType(Material.BARRIER);
-        meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lClose Menu"));
-        item.setItemMeta(meta);
+        ItemStack closeItem = new ItemStack(Material.BARRIER);
+        ItemMeta closeMeta = closeItem.getItemMeta();
+        assert closeMeta != null;
+        closeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lClose Menu"));
+        closeItem.setItemMeta(closeMeta);
         inv.setItem((invRows+1)*9 + 4, item);
 
         // Display cosmetics
@@ -335,12 +343,6 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().warning("The item '" + configItem + "' is not a material! Please check Spigot-API materials.");
             return;
         }
-        item.setType(material);
-        List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Hat Cosmetic");
-        lore.add(" ");
-        lore.add(ChatColor.AQUA + "Click to equip");
-        meta.setLore(lore);
         int i = 9;
         ConfigurationSection cosmeticsSection = getConfig().getConfigurationSection("hats");
         if(cosmeticsSection == null) {
@@ -349,30 +351,44 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         for(String cosmetics : cosmeticsSection.getKeys(false)) {
-            String hatItem = getConfig().getString("hats." + cosmetics + ".item");
+            ItemStack hatItem;
+            String hatItemTypeString = getConfig().getString("hats." + cosmetics + ".item");
             Material hatMaterial;
             if(i-8 > invRows*9) {
                 getLogger().warning("Hats are going beyond the GUI size! Please increase 'gui_rows' or reduce the amount of hats.");
                 return;
             }
-            if(hatItem != null) {
-                hatMaterial = Material.matchMaterial(hatItem);
-                if(hatMaterial != null) item.setType(hatMaterial);
-                else getLogger().warning("The item '" + hatItem + "' is not a material! Please check Spigot-API materials.");
+            if(hatItemTypeString != null) {
+                hatMaterial = Material.matchMaterial(hatItemTypeString);
+                if(hatMaterial != null) hatItem = new ItemStack(hatMaterial);
+                else {
+                    getLogger().warning("The item '" + hatItemTypeString + "' is not a material! Please check Spigot-API materials.");
+                    hatItem = new ItemStack(material);
+                }
             }
-            meta.setCustomModelData(getConfig().getInt("hats." + cosmetics + ".data"));
+            else {
+                hatItem = new ItemStack(material);
+            }
+            ItemMeta hatMeta = hatItem.getItemMeta();
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.GRAY + "Hat Cosmetic");
+            lore.add(" ");
+            lore.add(ChatColor.AQUA + "Click to equip");
+            assert hatMeta != null;
+            hatMeta.setLore(lore);
+            hatMeta.setCustomModelData(getConfig().getInt("hats." + cosmetics + ".data"));
             String name = getConfig().getString("hats." + cosmetics + ".name");
             if(name == null) {
                 getLogger().warning("The item '" + configItem + "' does not have a name defined!");
                 continue;
             }
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-            item.setItemMeta(meta);
-            NBTItem nbti = new NBTItem(item);
-            nbti.setString("permission", "hatcosmetics.hat." + cosmetics);
-            item = nbti.getItem();
-            hats.put(cosmetics, item); // Will later be moved to reload for player specific GUIs
-            inv.setItem(i, item);
+            hatMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+            hatItem.setItemMeta(hatMeta);
+            NBTItem nbti = new NBTItem(hatItem);
+            nbti.setString("Permission", "hatcosmetics.hat." + cosmetics);
+            hatItem = nbti.getItem();
+            hats.put(cosmetics, hatItem); // Will later be moved to reload for player specific GUIs
+            inv.setItem(i, hatItem);
             i++;
         }
     }
