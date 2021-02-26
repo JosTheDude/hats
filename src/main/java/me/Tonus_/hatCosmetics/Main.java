@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -243,6 +244,17 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+        if(event.getSlotType() == InventoryType.SlotType.ARMOR) {
+            if(event.getCursor() != null &&
+                    event.getCursor().getItemMeta() != null &&
+                    event.getCursor().getItemMeta().getLore() != null &&
+                    event.getCursor().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                if(event.getCurrentItem() != null && !event.getCurrentItem().getType().toString().contains("HELMET")) {
+                    event.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
+                    return;
+                }
+            }
+        }
         if(event.getCurrentItem() == null) return;
         if(event.getCurrentItem().getItemMeta() == null) return;
         if(!event.getInventory().equals(inv)) {
