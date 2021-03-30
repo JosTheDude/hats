@@ -30,7 +30,7 @@ public class MainHatsCommand implements CommandExecutor {
                 }
                 Player player = (Player) sender;
                 // Open GUI
-                player.openInventory(main.inv);
+                player.openInventory(main.inventoryManager.openInv());
                 return true;
             } else {
                 String header = main.getMessagesConfig().getString("prefix")+main.getMessagesConfig().getString("suffix");
@@ -139,7 +139,7 @@ public class MainHatsCommand implements CommandExecutor {
                         main.reloadConfig();
                         main.createMessagesConfig();
                         Main.hats.clear();
-                        main.createInv();
+                        main.inventoryManager.initHats();
                         if(sender instanceof Player) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("plugin_reload")));
                         main.getLogger().info("Plugin has been reloaded!");
                         return true;
