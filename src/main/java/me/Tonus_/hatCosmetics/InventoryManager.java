@@ -5,11 +5,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -74,7 +78,7 @@ public class InventoryManager {
         }
     }
 
-    public Inventory openInv() {
+    public Inventory openInv(Player player) {
         int invRows = main.getConfig().getInt("gui_rows");
         if(invRows < 1 || invRows > 4) {
             main.getLogger().warning("The GUI size is invalid! Defaulting to 4 rows...");
@@ -117,16 +121,42 @@ public class InventoryManager {
         closeItem.setItemMeta(closeMeta);
         inv.setItem((invRows+1)*9 + 4, closeItem);
 
+        // Check for equipped hat
+        String currentHat = null;
+        if (player.getEquipment() != null && player.getEquipment().getHelmet() != null) {
+            if (player.getEquipment().getHelmet().getItemMeta() != null && player.getEquipment().getHelmet().getItemMeta().getLore() != null &&
+                    player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                ItemStack helmet = player.getEquipment().getHelmet();
+                NBTItem nbti = new NBTItem(helmet);
+                currentHat = Arrays.asList(nbti.getString("Permission").split("\\.")).get(2);
+            }
+        }
+
         // Display cosmetics
         int slot = 9;
         List<ItemStack> hatItems = new ArrayList<>(Main.hats.values());
         Collections.reverse(hatItems);
         for(ItemStack hatItem : hatItems) {
+            ItemStack GUIItem = new ItemStack(hatItem);
             if(slot-8 > invRows*9) {
                 main.getLogger().warning("Hats are going beyond the GUI size! Please increase 'gui_rows' or reduce the amount of hats.");
                 return inv;
             }
-            inv.setItem(slot, hatItem);
+            if(currentHat != null) {
+                NBTItem nbti = new NBTItem(GUIItem);
+                if(nbti.getString("Permission").equals("hatcosmetics.hat." + currentHat)) {
+                    GUIItem.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+                    ItemMeta hatMeta = GUIItem.getItemMeta();
+                    assert hatMeta != null;
+                    List<String> lore = hatMeta.getLore();
+                    assert lore != null;
+                    lore.set(lore.size()-1, ChatColor.AQUA + "Click to unequip");
+                    hatMeta.setLore(lore);
+                    hatMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                    GUIItem.setItemMeta(hatMeta);
+                }
+            }
+            inv.setItem(slot, GUIItem);
             slot++;
         }
         return inv;

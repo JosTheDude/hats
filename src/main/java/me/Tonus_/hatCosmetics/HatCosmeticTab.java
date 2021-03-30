@@ -28,7 +28,7 @@ public class HatCosmeticTab implements TabCompleter {
             if(args[0].equalsIgnoreCase("equip")) {
                 if(args.length == 2) {
                     for(String a : hats) {
-                        if(a.toLowerCase().startsWith(args[1].toLowerCase())) result.add(a);
+                        if(a.toLowerCase().startsWith(args[1])) result.add(a);
                     }
                     return result;
                 }

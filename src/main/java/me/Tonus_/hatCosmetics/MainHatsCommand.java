@@ -30,7 +30,7 @@ public class MainHatsCommand implements CommandExecutor {
                 }
                 Player player = (Player) sender;
                 // Open GUI
-                player.openInventory(main.inventoryManager.openInv());
+                player.openInventory(main.inventoryManager.openInv(player));
                 return true;
             } else {
                 String header = main.getMessagesConfig().getString("prefix")+main.getMessagesConfig().getString("suffix");
@@ -76,7 +76,6 @@ public class MainHatsCommand implements CommandExecutor {
                     ItemStack item = Main.hats.get(args[1]);
                     NBTItem nbti = new NBTItem(item);
                     if(!player.hasPermission(nbti.getString("Permission"))) {
-                        player.sendMessage(nbti.toString());
                         if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_permission_other")));
                         else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_permission")));
                         return true;
@@ -124,7 +123,11 @@ public class MainHatsCommand implements CommandExecutor {
                     }
                     // Take cosmetic off if it exists
                     if(player.getEquipment() == null || player.getEquipment().getHelmet() == null ||
-                            player.getEquipment().getHelmet().getItemMeta() == null || player.getEquipment().getHelmet().getItemMeta().getLore() == null) return true;
+                            player.getEquipment().getHelmet().getItemMeta() == null || player.getEquipment().getHelmet().getItemMeta().getLore() == null) {
+                        if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_other")));
+                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat")));
+                        return true;
+                    }
                     if(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
                         player.getEquipment().setHelmet(new ItemStack(Material.AIR));
                         if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_unequip_success_other")));
@@ -136,6 +139,7 @@ public class MainHatsCommand implements CommandExecutor {
                 }
                 else if(args[0].equalsIgnoreCase("reload")) {
                     if(sender.hasPermission("hatcosmetics.reload")) {
+                        main.saveDefaultConfig();
                         main.reloadConfig();
                         main.createMessagesConfig();
                         Main.hats.clear();

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
-    public HashMap<Player, ItemStack> droppedCosmetic = new HashMap<>();
+    private final HashMap<Player, ItemStack> droppedCosmetic = new HashMap<>();
     public static HashMap<String, ItemStack> hats = new HashMap<>();
 
     public FileConfiguration messagesConfig;
@@ -55,7 +55,6 @@ public class Main extends JavaPlugin implements Listener {
     public void createMessagesConfig() {
         File messagesConfigFile = new File(getDataFolder(), "messages.yml");
         if (!messagesConfigFile.exists()) {
-            messagesConfigFile.getParentFile().mkdirs();
             saveResource("messages.yml", false);
         }
 
@@ -123,19 +122,25 @@ public class Main extends JavaPlugin implements Listener {
         }
         if(event.getCurrentItem() == null) return;
         if(event.getCurrentItem().getItemMeta() == null) return;
+
+        Player player = (Player) event.getWhoClicked();
+        String header = this.getMessagesConfig().getString("prefix")+this.getMessagesConfig().getString("suffix");
+
         if(!event.getView().getTitle().equals(ChatColor.translateAlternateColorCodes('&', "&b&lHats"))) {
             if(event.getWhoClicked().getGameMode().equals(GameMode.CREATIVE)) return;
             if(event.getCurrentItem().getItemMeta().getLore() == null) return;
-            if(event.getCurrentItem().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) event.setCancelled(true);
+            if(event.getCurrentItem().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                event.setCurrentItem(new ItemStack(Material.AIR));
+                if(event.getSlotType() == InventoryType.SlotType.ARMOR) player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
+                event.setCancelled(true);
+            }
         } else {
             if(!event.getCurrentItem().getItemMeta().hasDisplayName()) return;
 
             event.setCancelled(true);
-            Player player = (Player) event.getWhoClicked();
 
             if(event.getSlot() >= 9 && event.getSlot() < event.getInventory().getSize()-9 && event.getCurrentItem().getItemMeta().getLore() != null &&
             event.getCurrentItem().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
-                String header = this.getMessagesConfig().getString("prefix")+this.getMessagesConfig().getString("suffix");
                 helmCheck: {
                     if (player.getEquipment() != null && player.getEquipment().getHelmet() != null) {
                         if (player.getEquipment().getHelmet().getItemMeta() != null && player.getEquipment().getHelmet().getItemMeta().getLore() != null &&
@@ -146,21 +151,27 @@ public class Main extends JavaPlugin implements Listener {
                         return;
                     }
                 }
-                ItemStack item = event.getCurrentItem();
-                NBTItem nbti = new NBTItem(item);
-                if(player.hasPermission(nbti.getString("Permission"))) {
-                    ItemMeta meta = item.getItemMeta();
-                    List<String> lore = new ArrayList<>();
-                    lore.add(ChatColor.GRAY + "Hat Cosmetic");
-                    meta.setLore(lore);
-                    item.setItemMeta(meta);
+                if(event.getCurrentItem().getItemMeta().getLore().get(2).contains("Click to equip")) {
+                    ItemStack item = event.getCurrentItem();
+                    NBTItem nbti = new NBTItem(item);
+                    if (player.hasPermission(nbti.getString("Permission"))) {
+                        ItemMeta meta = item.getItemMeta();
+                        List<String> lore = new ArrayList<>();
+                        lore.add(ChatColor.GRAY + "Hat Cosmetic");
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
 
-                    player.getEquipment().setHelmet(item);
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
+                        player.getEquipment().setHelmet(item);
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
+                        player.closeInventory();
+                        return;
+                    }
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
+                } else if(event.getCurrentItem().getItemMeta().getLore().get(2).contains("Click to unequip")) {
                     player.closeInventory();
-                    return;
+                    player.getEquipment().setHelmet(new ItemStack(Material.AIR));
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
                 }
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
             } else if(event.getSlot() == event.getInventory().getSize()-5 && event.getCurrentItem().getType().equals(Material.BARRIER) && event.getCurrentItem().getItemMeta().getDisplayName().contains("Close Menu")) {
                 player.closeInventory();
             }
