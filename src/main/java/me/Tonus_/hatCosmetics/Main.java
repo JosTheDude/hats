@@ -151,7 +151,8 @@ public class Main extends JavaPlugin implements Listener {
                         return;
                     }
                 }
-                if(event.getCurrentItem().getItemMeta().getLore().get(2).contains("Click to equip")) {
+                int lastLine = event.getCurrentItem().getItemMeta().getLore().size() - 1;
+                if(event.getCurrentItem().getItemMeta().getLore().get(lastLine).contains("Click to equip")) {
                     ItemStack item = event.getCurrentItem();
                     NBTItem nbti = new NBTItem(item);
                     if (player.hasPermission(nbti.getString("Permission"))) {
@@ -167,7 +168,7 @@ public class Main extends JavaPlugin implements Listener {
                         return;
                     }
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
-                } else if(event.getCurrentItem().getItemMeta().getLore().get(2).contains("Click to unequip")) {
+                } else if(event.getCurrentItem().getItemMeta().getLore().get(lastLine).contains("Click to unequip")) {
                     player.closeInventory();
                     player.getEquipment().setHelmet(new ItemStack(Material.AIR));
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
