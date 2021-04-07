@@ -14,17 +14,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class InventoryManager {
     private final Main main;
+    private final ArrayList<String> hatOrder = new ArrayList<>();
 
     public InventoryManager(Main main) {
         this.main = main;
     }
 
     public void initHats() {
+        hatOrder.clear();
         ConfigurationSection cosmeticsSection = main.getConfig().getConfigurationSection("hats");
         if(cosmeticsSection == null) {
             main.getLogger().severe("The hats section of the config is missing! Delete your file and restart the server to regenerate.");
@@ -75,6 +76,7 @@ public class InventoryManager {
             nbti.setString("Permission", "hatcosmetics.hat." + cosmetics);
             hatItem = nbti.getItem();
             Main.hats.put(cosmetics, hatItem);
+            hatOrder.add(cosmetics);
         }
     }
 
@@ -134,10 +136,8 @@ public class InventoryManager {
 
         // Display cosmetics
         int slot = 9;
-        List<ItemStack> hatItems = new ArrayList<>(Main.hats.values());
-        Collections.reverse(hatItems);
-        for(ItemStack hatItem : hatItems) {
-            ItemStack GUIItem = new ItemStack(hatItem);
+        for(String hat : hatOrder) {
+            ItemStack GUIItem = new ItemStack(Main.hats.get(hat));
             if(slot-8 > invRows*9) {
                 main.getLogger().warning("Hats are going beyond the GUI size! Please increase 'gui_rows' or reduce the amount of hats.");
                 return inv;
