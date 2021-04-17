@@ -18,10 +18,12 @@ import java.util.List;
 
 public class InventoryManager {
     private final Main main;
+    private final MessageManager messageManager;
     private final ArrayList<String> hatOrder = new ArrayList<>();
 
     public InventoryManager(Main main) {
         this.main = main;
+        this.messageManager = main.messageManager;
     }
 
     public void initHats() {
@@ -61,7 +63,7 @@ public class InventoryManager {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Hat Cosmetic");
             lore.add(" ");
-            lore.add(ChatColor.AQUA + "Click to equip");
+            lore.add(messageManager.getMessage("hat_equip"));
             assert hatMeta != null;
             hatMeta.setLore(lore);
             hatMeta.setCustomModelData(main.getConfig().getInt("hats." + cosmetics + ".data"));
@@ -86,7 +88,7 @@ public class InventoryManager {
             main.getLogger().warning("The GUI size is invalid! Defaulting to 4 rows...");
             invRows = 4;
         }
-        Inventory inv = Bukkit.createInventory(null, (invRows*9)+18, ChatColor.AQUA + "" + ChatColor.BOLD + "Hats");
+        Inventory inv = Bukkit.createInventory(null, (invRows*9)+18, messageManager.getMessage("gui_title"));
 
         // Start items & make border items
         String configItem = main.getConfig().getString("border");
@@ -150,7 +152,7 @@ public class InventoryManager {
                     assert hatMeta != null;
                     List<String> lore = hatMeta.getLore();
                     assert lore != null;
-                    lore.set(lore.size()-1, ChatColor.AQUA + "Click to unequip");
+                    lore.set(lore.size()-1, messageManager.getMessage("hat_unequip"));
                     hatMeta.setLore(lore);
                     hatMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     GUIItem.setItemMeta(hatMeta);

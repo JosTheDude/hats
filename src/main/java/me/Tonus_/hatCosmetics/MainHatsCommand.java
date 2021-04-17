@@ -15,9 +15,11 @@ import java.util.List;
 
 public class MainHatsCommand implements CommandExecutor {
     private final Main main;
+    private final MessageManager messageManager;
 
     public MainHatsCommand(Main main) {
         this.main = main;
+        this.messageManager = main.messageManager;
     }
 
     @Override
@@ -33,7 +35,6 @@ public class MainHatsCommand implements CommandExecutor {
                 player.openInventory(main.inventoryManager.openInv(player));
                 return true;
             } else {
-                String header = main.getMessagesConfig().getString("prefix")+main.getMessagesConfig().getString("suffix");
                 if(args[0].equalsIgnoreCase("help")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             "&8&m------------&8[ &3&lHats &8]&m------------\n"
@@ -46,21 +47,21 @@ public class MainHatsCommand implements CommandExecutor {
                 else if(args[0].equalsIgnoreCase("equip")) {
                     // Check if a hat is specified and if it exists
                     if(!(args.length > 1)) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_given")));
+                        sender.sendMessage(messageManager.getPlayerMessage("no_hat_given", null));
                         return true;
                     } else if(!Main.hats.containsKey(args[1])) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_not_exist")));
+                        sender.sendMessage(messageManager.getPlayerMessage("hat_not_exist", null));
                         return true;
                     }
                     Player player;
                     if(args.length > 2) {
                         if(!sender.hasPermission("hatcosmetics.equip.other")) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_permission")));
+                            sender.sendMessage(messageManager.getPlayerMessage("no_permission", null));
                             return true;
                         }
                         player = main.getServer().getPlayer(args[2]);
                         if(player == null || !player.isOnline()) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("not_online")));
+                            sender.sendMessage(messageManager.getPlayerMessage("not_online", null));
                             return true;
                         }
                     } else {
@@ -73,11 +74,11 @@ public class MainHatsCommand implements CommandExecutor {
                     if(player.getEquipment() == null) return true;
 
                     // First check if the player has permission to the hat
-                    ItemStack item = Main.hats.get(args[1]);
+                    ItemStack item = new ItemStack(Main.hats.get(args[1]));
                     NBTItem nbti = new NBTItem(item);
                     if(!player.hasPermission(nbti.getString("Permission"))) {
-                        if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_permission_other")));
-                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_permission")));
+                        if (args.length > 2) sender.sendMessage(messageManager.getPlayerMessage("no_hat_permission_other", item));
+                        else player.sendMessage(messageManager.getPlayerMessage("no_hat_permission", item));
                         return true;
                     }
 
@@ -85,8 +86,8 @@ public class MainHatsCommand implements CommandExecutor {
                     if (player.getEquipment().getHelmet() != null) {
                         if (player.getEquipment().getHelmet().getItemMeta() != null || player.getEquipment().getHelmet().getItemMeta().getLore() != null ||
                                 !(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic"))) {
-                            if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("helmet_exist_other")));
-                            else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("helmet_exist")));
+                            if (args.length > 2) sender.sendMessage(messageManager.getPlayerMessage("helmet_exist_other", null));
+                            else player.sendMessage(messageManager.getPlayerMessage("helmet_exist", null));
                             return true;
                         }
                     }
@@ -99,19 +100,19 @@ public class MainHatsCommand implements CommandExecutor {
                     meta.setLore(lore);
                     item.setItemMeta(meta);
                     player.getEquipment().setHelmet(item);
-                    if (args.length > 2) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_success_other")));
-                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_success")));
+                    if (args.length > 2) sender.sendMessage(messageManager.getPlayerMessage("hat_success_other", item));
+                    else player.sendMessage(messageManager.getPlayerMessage("hat_success", item));
                 }
                 else if(args[0].equalsIgnoreCase("unequip")) {
                     Player player;
                     if(args.length > 1) {
                         if(!sender.hasPermission("hatcosmetics.unequip.other")) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_permission")));
+                            sender.sendMessage(messageManager.getPlayerMessage("no_permission", null));
                             return true;
                         }
                         player = main.getServer().getPlayer(args[1]);
                         if(player == null || !player.isOnline()) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("not_online")));
+                            sender.sendMessage(messageManager.getPlayerMessage("not_online", null));
                             return true;
                         }
                     } else {
@@ -124,31 +125,32 @@ public class MainHatsCommand implements CommandExecutor {
                     // Take cosmetic off if it exists
                     if(player.getEquipment() == null || player.getEquipment().getHelmet() == null ||
                             player.getEquipment().getHelmet().getItemMeta() == null || player.getEquipment().getHelmet().getItemMeta().getLore() == null) {
-                        if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_other")));
-                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat")));
+                        if(args.length > 1) sender.sendMessage(messageManager.getPlayerMessage("no_hat_other", null));
+                        else player.sendMessage(messageManager.getPlayerMessage("no_hat", null));
                         return true;
                     }
                     if(player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                        if(args.length > 1) sender.sendMessage(messageManager.getPlayerMessage("hat_unequip_success_other", player.getEquipment().getHelmet()));
+                        else player.sendMessage(messageManager.getPlayerMessage("hat_unequip_success", player.getEquipment().getHelmet()));
+
                         player.getEquipment().setHelmet(new ItemStack(Material.AIR));
-                        if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_unequip_success_other")));
-                        else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("hat_unequip_success")));
                         return true;
                     }
-                    if(args.length > 1) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat_other")));
-                    else player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_hat")));
+                    if(args.length > 1) sender.sendMessage(messageManager.getPlayerMessage("no_hat_other", null));
+                    else player.sendMessage(messageManager.getPlayerMessage("no_hat", null));
                 }
                 else if(args[0].equalsIgnoreCase("reload")) {
                     if(sender.hasPermission("hatcosmetics.reload")) {
                         main.saveDefaultConfig();
                         main.reloadConfig();
-                        main.createMessagesConfig();
+                        messageManager.createMessagesConfig();
                         Main.hats.clear();
                         main.inventoryManager.initHats();
-                        if(sender instanceof Player) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("plugin_reload")));
+                        if(sender instanceof Player) sender.sendMessage(messageManager.getPlayerMessage("plugin_reload", null));
                         main.getLogger().info("Plugin has been reloaded!");
                         return true;
                     }
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header + main.getMessagesConfig().getString("no_permission")));
+                    sender.sendMessage(messageManager.getPlayerMessage("no_permission", null));
                 }
             }
         }

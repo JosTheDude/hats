@@ -1,22 +1,29 @@
-# HatCosmetics messages version: 1
+# HatCosmetics messages version: 2
 # For both my sake and yours, please DO NOT change the messages version!
+
+# Placeholders:
+# {hat} - Returns the name of the equipped/unequipped hat
 
 # This file is used for the plugin's various messages
 prefix: "&3&lHats"
 suffix: " &3&l>> "
 
+gui_title: "&b&lHats"
+hat_equip: "&bClick to equip"
+hat_unequip: "&bClick to unequip"
+
 hat_not_exist: "&bThat hat does not exist!"
-hat_success: "&bYou equipped your hat successfully!"
-hat_success_other: "&bThe player equipped the hat successfully!"
-hat_unequip_success: "&bYour hat has been unequipped!"
-hat_unequip_success_other: "&bThat player's hat has been unequipped!"
+hat_success: "&bYou equipped {hat}&b successfully!"
+hat_success_other: "&bThe player equipped {hat}&b successfully!"
+hat_unequip_success: "&b{hat}&b has been unequipped!"
+hat_unequip_success_other: "&bThat player's {hat}&b has been unequipped!"
 helmet_exist: "&bSomething else is already on your head!"
 helmet_exist_other: "&bThat player already has something on their head!"
 no_hat: "&bYou don't have a hat equipped!"
 no_hat_given: "&bYou must specify a hat to equip!"
 no_hat_other: "&bThat player doesn't have a hat equipped!"
-no_hat_permission: "&bYou do not have permission to equip that hat."
-no_hat_permission_other: "&bThat player does not have permission to equip the hat."
+no_hat_permission: "&bYou do not have permission to equip {hat}&b."
+no_hat_permission_other: "&bThat player does not have permission to equip {hat}&b."
 no_permission: "&bYou do not have permission to do this."
 not_online: "&bThat player is not currently online!"
 plugin_reload: "&bPlugin has been reloaded!"

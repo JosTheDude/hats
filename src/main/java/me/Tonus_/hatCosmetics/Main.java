@@ -4,9 +4,6 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,8 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,14 +24,15 @@ public class Main extends JavaPlugin implements Listener {
     private final HashMap<Player, ItemStack> droppedCosmetic = new HashMap<>();
     public static HashMap<String, ItemStack> hats = new HashMap<>();
 
-    public FileConfiguration messagesConfig;
     public InventoryManager inventoryManager;
+    public MessageManager messageManager;
 
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
         this.saveDefaultConfig();
-        createMessagesConfig();
+        messageManager = new MessageManager(this);
+        messageManager.createMessagesConfig();
         inventoryManager = new InventoryManager(this);
         inventoryManager.initHats();
         Objects.requireNonNull(getCommand("hatcosmetics")).setTabCompleter(new HatCosmeticTab());
@@ -46,24 +42,6 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
 
-    }
-
-    public FileConfiguration getMessagesConfig() {
-        return this.messagesConfig;
-    }
-
-    public void createMessagesConfig() {
-        File messagesConfigFile = new File(getDataFolder(), "messages.yml");
-        if (!messagesConfigFile.exists()) {
-            saveResource("messages.yml", false);
-        }
-
-        messagesConfig= new YamlConfiguration();
-        try {
-            messagesConfig.load(messagesConfigFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
     }
 
     // Ensure cosmetics don't drop if the player dies
@@ -124,14 +102,15 @@ public class Main extends JavaPlugin implements Listener {
         if(event.getCurrentItem().getItemMeta() == null) return;
 
         Player player = (Player) event.getWhoClicked();
-        String header = this.getMessagesConfig().getString("prefix")+this.getMessagesConfig().getString("suffix");
 
-        if(!event.getView().getTitle().equals(ChatColor.translateAlternateColorCodes('&', "&b&lHats"))) {
+        if(!event.getView().getTitle().equals(messageManager.getMessage("gui_title"))) {
             if(event.getWhoClicked().getGameMode().equals(GameMode.CREATIVE)) return;
             if(event.getCurrentItem().getItemMeta().getLore() == null) return;
             if(event.getCurrentItem().getItemMeta().getLore().get(0).contains("Hat Cosmetic")) {
+                if(event.getSlotType() == InventoryType.SlotType.ARMOR) {
+                    player.sendMessage(messageManager.getPlayerMessage("hat_unequip_success", event.getCurrentItem()));
+                }
                 event.setCurrentItem(new ItemStack(Material.AIR));
-                if(event.getSlotType() == InventoryType.SlotType.ARMOR) player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
                 event.setCancelled(true);
             }
         } else {
@@ -146,32 +125,32 @@ public class Main extends JavaPlugin implements Listener {
                         if (player.getEquipment().getHelmet().getItemMeta() != null && player.getEquipment().getHelmet().getItemMeta().getLore() != null &&
                                 player.getEquipment().getHelmet().getItemMeta().getLore().get(0).contains("Hat Cosmetic"))
                             break helmCheck;
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("helmet_exist")));
+                        player.sendMessage(messageManager.getPlayerMessage("helmet_exist", null));
                         player.closeInventory();
                         return;
                     }
                 }
-                int lastLine = event.getCurrentItem().getItemMeta().getLore().size() - 1;
-                if(event.getCurrentItem().getItemMeta().getLore().get(lastLine).contains("Click to equip")) {
-                    ItemStack item = event.getCurrentItem();
-                    NBTItem nbti = new NBTItem(item);
+                ItemStack item = event.getCurrentItem();
+                NBTItem nbti = new NBTItem(item);
+                ItemMeta meta = item.getItemMeta();
+                int lastLine = meta.getLore().size() - 1;
+                if(meta.getLore().get(lastLine).equals(messageManager.getMessage("hat_equip"))) {
                     if (player.hasPermission(nbti.getString("Permission"))) {
-                        ItemMeta meta = item.getItemMeta();
                         List<String> lore = new ArrayList<>();
                         lore.add(ChatColor.GRAY + "Hat Cosmetic");
                         meta.setLore(lore);
                         item.setItemMeta(meta);
 
                         player.getEquipment().setHelmet(item);
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_success")));
+                        player.sendMessage(messageManager.getPlayerMessage("hat_success", item));
                         player.closeInventory();
                         return;
                     }
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("no_hat_permission")));
-                } else if(event.getCurrentItem().getItemMeta().getLore().get(lastLine).contains("Click to unequip")) {
+                    player.sendMessage(messageManager.getPlayerMessage("no_hat_permission", item));
+                } else if(meta.getLore().get(lastLine).equals(ChatColor.translateAlternateColorCodes('&', messageManager.getMessage("hat_unequip")))) {
                     player.closeInventory();
+                    player.sendMessage(messageManager.getPlayerMessage("hat_unequip_success", item));
                     player.getEquipment().setHelmet(new ItemStack(Material.AIR));
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', header + this.getMessagesConfig().getString("hat_unequip_success")));
                 }
             } else if(event.getSlot() == event.getInventory().getSize()-5 && event.getCurrentItem().getType().equals(Material.BARRIER) && event.getCurrentItem().getItemMeta().getDisplayName().contains("Close Menu")) {
                 player.closeInventory();
