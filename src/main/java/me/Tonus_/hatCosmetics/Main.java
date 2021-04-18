@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +36,7 @@ public class Main extends JavaPlugin implements Listener {
         inventoryManager.initHats();
         Objects.requireNonNull(getCommand("hatcosmetics")).setTabCompleter(new HatCosmeticTab());
         Objects.requireNonNull(getCommand("hatcosmetics")).setExecutor(new MainHatsCommand(this));
+        new Metrics(this, 11075);
     }
 
     @Override
@@ -136,8 +136,10 @@ public class Main extends JavaPlugin implements Listener {
                 int lastLine = meta.getLore().size() - 1;
                 if(meta.getLore().get(lastLine).equals(messageManager.getMessage("hat_equip"))) {
                     if (player.hasPermission(nbti.getString("Permission"))) {
-                        List<String> lore = new ArrayList<>();
-                        lore.add(ChatColor.GRAY + "Hat Cosmetic");
+                        List<String> lore = meta.getLore();
+                        assert lore != null;
+                        lore.remove(lore.size()-1);
+                        lore.remove(lore.size()-1);
                         meta.setLore(lore);
                         item.setItemMeta(meta);
 

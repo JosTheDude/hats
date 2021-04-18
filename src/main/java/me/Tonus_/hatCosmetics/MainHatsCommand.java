@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainHatsCommand implements CommandExecutor {
@@ -94,9 +93,11 @@ public class MainHatsCommand implements CommandExecutor {
 
                     // Set player's helmet slot to specified hat
                     ItemMeta meta = item.getItemMeta();
-                    List<String> lore = new ArrayList<>();
-                    lore.add(ChatColor.GRAY + "Hat Cosmetic");
                     assert meta != null;
+                    List<String> lore = meta.getLore();
+                    assert lore != null;
+                    lore.remove(lore.size()-1);
+                    lore.remove(lore.size()-1);
                     meta.setLore(lore);
                     item.setItemMeta(meta);
                     player.getEquipment().setHelmet(item);

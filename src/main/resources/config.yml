@@ -1,4 +1,4 @@
-# HatCosmetics config version: 2
+# HatCosmetics config version: 3
 # For both my sake and yours, please DO NOT change the config version!
 
 # Refer to Spigot-API Materials for list of items: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
@@ -11,14 +11,12 @@ border: LIGHT_BLUE_STAINED_GLASS_PANE
 # This is only for the actual hats and not the two rows for the border and close menu item
 gui_rows: 1
 
-# Create your hats here using this format:
-#
-# hats:
-#   staffHat:
-#     item: DIAMOND_HOE (only use this if you need to overwrite the default item for certain hats)
-#     data: 1000101
-#     name: "&fStaff Hat"
 hats:
-  staffHat:
-    data: 1000101
-    name: "&fStaff Hat"
+  # This is where you add your hats
+  staffHat:             # The name used for /hats equip and the hat's permission
+    #item: DIAMOND_HOE  # (OPTIONAL) Only use if your hat uses a different item from the rest
+    data: 1000101       # The custom model data defined in your resource pack for the item
+    name: "&fStaff Hat" # The name displayed on the item
+    #description:       # (OPTIONAL) Adds list of text underneath the "Hat Cosmetic" line
+    #  - ""
+    #  - "&bShow who's boss!"

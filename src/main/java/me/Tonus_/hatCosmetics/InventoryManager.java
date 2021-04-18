@@ -62,6 +62,9 @@ public class InventoryManager {
             ItemMeta hatMeta = hatItem.getItemMeta();
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Hat Cosmetic");
+            for(String descText : main.getConfig().getStringList("hats." + cosmetics + ".description")) {
+                lore.add(ChatColor.translateAlternateColorCodes('&', descText));
+            }
             lore.add(" ");
             lore.add(messageManager.getMessage("hat_equip"));
             assert hatMeta != null;
