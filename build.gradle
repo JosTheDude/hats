@@ -12,12 +12,12 @@ repositories {
     mavenCentral()
     maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
     maven { url = 'https://repo.codemc.org/repository/maven-public/' }
-    maven { url = 'https://repo.maven.apache.org/maven2' }
 }
 
 dependencies {
-    implementation 'de.tr7zw:item-nbt-api:2.8.0'
-    compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
+    implementation 'de.tr7zw:item-nbt-api:2.9.0-SNAPSHOT'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT'
 }
 
 group = 'me.Tonus_'
