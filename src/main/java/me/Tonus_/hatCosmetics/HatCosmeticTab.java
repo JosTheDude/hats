@@ -3,6 +3,7 @@ package me.Tonus_.hatCosmetics;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ public class HatCosmeticTab implements TabCompleter {
     List<String> arguments = new ArrayList<>();
     Set<String> hats = Main.hats.keySet();
 
-    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         if(arguments.isEmpty()) {
             arguments.add("help"); arguments.add("equip"); arguments.add("unequip"); arguments.add("reload");
         }
