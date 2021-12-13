@@ -12,14 +12,13 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class InventoryManager {
     private final Main main;
     private final MessageManager messageManager;
     private final ArrayList<String> hatOrder = new ArrayList<>();
+    private final HashMap<UUID, Integer> startingHatIndex = new HashMap<>();
 
     public InventoryManager(Main main) {
         this.main = main;
@@ -87,7 +86,15 @@ public class InventoryManager {
 
     public Inventory openInv(Player player) {
         int invRows = main.getConfig().getInt("gui_rows");
-        if(invRows < 1 || invRows > 4) {
+        if(invRows == -1) {
+            double autoRows = (double) hatOrder.size() / 9;
+            if(autoRows > 4) {
+                main.getLogger().warning("Not all of the hats will be able to fit in the GUI! Defaulting to 4 rows...");
+                autoRows = 4;
+            }
+            invRows = (int) Math.ceil(autoRows);
+        }
+        else if(invRows < 1 || invRows > 4) {
             main.getLogger().warning("The GUI size is invalid! Defaulting to 4 rows...");
             invRows = 4;
         }
@@ -141,28 +148,52 @@ public class InventoryManager {
 
         // Display cosmetics
         int slot = 9;
+        boolean hideHats = main.getConfig().getBoolean("hide_hats");
         for(String hat : hatOrder) {
             ItemStack GUIItem = new ItemStack(Main.hats.get(hat));
+            NBTItem nbti = new NBTItem(GUIItem);
+
+            // If hiding hats is enabled and the player doesn't
+            // have permission to the hat, skip it from being displayed
+            if(hideHats && !player.hasPermission(nbti.getString("Permission"))) {
+                continue;
+            }
+
             if(slot-8 > invRows*9) {
-                main.getLogger().warning("Hats are going beyond the GUI size! Please increase 'gui_rows' or reduce the amount of hats.");
+                GUIItem = new ItemStack(Material.ARROW);
+                ItemMeta GUIMeta = GUIItem.getItemMeta();
+                assert GUIMeta != null;
+
+                // If this is not the first page, add a previous page button
+                if(startingHatIndex.get(player.getUniqueId()) != null) {
+                    GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lPrevious Page"));
+                    GUIItem.setItemMeta(GUIMeta);
+                    inv.setItem((invRows+1)*9 + 3, GUIItem);
+                }
+
+                GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lNext Page"));
+                GUIItem.setItemMeta(GUIMeta);
+                inv.setItem((invRows+1)*9 + 5, GUIItem);
                 return inv;
             }
-            if(currentHat != null) {
-                NBTItem nbti = new NBTItem(GUIItem);
-                if(nbti.getString("Permission").equals("hatcosmetics.hat." + currentHat)) {
-                    GUIItem.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-                    ItemMeta hatMeta = GUIItem.getItemMeta();
-                    assert hatMeta != null;
-                    List<String> lore = hatMeta.getLore();
-                    assert lore != null;
-                    lore.set(lore.size()-1, messageManager.getMessage("hat_unequip"));
-                    hatMeta.setLore(lore);
-                    hatMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                    GUIItem.setItemMeta(hatMeta);
-                }
+
+            if(currentHat != null && nbti.getString("Permission").equals("hatcosmetics.hat." + currentHat)) {
+                GUIItem.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+                ItemMeta hatMeta = GUIItem.getItemMeta();
+                assert hatMeta != null;
+                List<String> lore = hatMeta.getLore();
+                assert lore != null;
+                lore.set(lore.size()-1, messageManager.getMessage("hat_unequip"));
+                hatMeta.setLore(lore);
+                hatMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                GUIItem.setItemMeta(hatMeta);
             }
             inv.setItem(slot, GUIItem);
             slot++;
+        }
+        if(slot == 9 && hideHats) {
+            player.sendMessage(messageManager.getPlayerMessage("no_hats_gui", null));
+            return null;
         }
         return inv;
     }

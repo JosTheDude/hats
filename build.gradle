@@ -12,7 +12,7 @@ repositories {
     mavenCentral()
     maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
     maven { url = 'https://repo.codemc.org/repository/maven-public/' }
-    maven { url = 'http://repo.maven.apache.org/maven2' }
+    maven { url = 'https://repo.maven.apache.org/maven2' }
 }
 
 dependencies {
@@ -21,7 +21,7 @@ dependencies {
 }
 
 group = 'me.Tonus_'
-version = '1.1.1'
+version = '1.2.0-b1'
 sourceCompatibility = '1.8'
 
 shadowJar {

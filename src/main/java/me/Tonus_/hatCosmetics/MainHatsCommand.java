@@ -7,9 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class MainHatsCommand implements CommandExecutor {
@@ -31,7 +33,10 @@ public class MainHatsCommand implements CommandExecutor {
                 }
                 Player player = (Player) sender;
                 // Open GUI
-                player.openInventory(main.inventoryManager.openInv(player));
+                Inventory inv = main.inventoryManager.openInv(player);
+                if(inv != null) {
+                    player.openInventory(inv);
+                }
                 return true;
             } else {
                 if(args[0].equalsIgnoreCase("help")) {

@@ -1,4 +1,4 @@
-# HatCosmetics messages version: 2
+# HatCosmetics messages version: 3
 # For both my sake and yours, please DO NOT change the messages version!
 
 # Placeholders:
@@ -24,6 +24,7 @@ no_hat_given: "&bYou must specify a hat to equip!"
 no_hat_other: "&bThat player doesn't have a hat equipped!"
 no_hat_permission: "&bYou do not have permission to equip {hat}&b."
 no_hat_permission_other: "&bThat player does not have permission to equip {hat}&b."
+no_hats_gui: "&bYou don't have access to any hats!"
 no_permission: "&bYou do not have permission to do this."
 not_online: "&bThat player is not currently online!"
 plugin_reload: "&bPlugin has been reloaded!"
