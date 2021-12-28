@@ -1,6 +1,8 @@
-package me.Tonus_.hatCosmetics;
+package me.Tonus_.hatCosmetics.events;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
+import me.Tonus_.hatCosmetics.Main;
+import me.Tonus_.hatCosmetics.MessageManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -12,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class MainHatsCommand implements CommandExecutor {
@@ -21,7 +22,7 @@ public class MainHatsCommand implements CommandExecutor {
 
     public MainHatsCommand(Main main) {
         this.main = main;
-        this.messageManager = main.messageManager;
+        this.messageManager = main.getMessageManager();
     }
 
     @Override
@@ -34,7 +35,7 @@ public class MainHatsCommand implements CommandExecutor {
                 }
                 Player player = (Player) sender;
                 // Open GUI
-                Inventory inv = main.inventoryManager.openInv(player);
+                Inventory inv = main.getInventoryManager().openInv(player);
                 if(inv != null) {
                     player.openInventory(inv);
                 }
@@ -152,7 +153,7 @@ public class MainHatsCommand implements CommandExecutor {
                         main.reloadConfig();
                         messageManager.createMessagesConfig();
                         Main.hats.clear();
-                        main.inventoryManager.initHats();
+                        main.getInventoryManager().initHats();
                         if(sender instanceof Player) sender.sendMessage(messageManager.getPlayerMessage("plugin_reload", null));
                         main.getLogger().info("Plugin has been reloaded!");
                         return true;

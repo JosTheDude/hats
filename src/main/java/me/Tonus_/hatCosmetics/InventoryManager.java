@@ -18,11 +18,27 @@ public class InventoryManager {
     private final Main main;
     private final MessageManager messageManager;
     private final ArrayList<String> hatOrder = new ArrayList<>();
-    private final HashMap<UUID, Integer> startingHatIndex = new HashMap<>();
+    private final HashMap<UUID, ArrayList<Integer>> playerHats = new HashMap<>();
+    private final HashMap<UUID, Integer> playerGUIPage = new HashMap<>();
+
+    // Returns what page the player is currently on
+    public int getPlayerPage(UUID uuid) {
+        return playerGUIPage.get(uuid);
+    }
+
+    // Sets what page the player is currently on
+    public void setPlayerPage(UUID uuid, int page) {
+        playerGUIPage.put(uuid, page);
+    }
+
+    // Removes the page integer for the given player
+    public void removePlayerPage(UUID uuid) {
+        playerGUIPage.remove(uuid);
+    }
 
     public InventoryManager(Main main) {
         this.main = main;
-        this.messageManager = main.messageManager;
+        this.messageManager = main.getMessageManager();
     }
 
     public void initHats() {
@@ -98,7 +114,23 @@ public class InventoryManager {
             main.getLogger().warning("The GUI size is invalid! Defaulting to 4 rows...");
             invRows = 4;
         }
-        Inventory inv = Bukkit.createInventory(null, (invRows*9)+18, messageManager.getMessage("gui_title"));
+
+        Inventory inv;
+        int currentPage = 1;
+        int pages = 1;
+
+        // If there are multiple pages of hats, be sure to include the page number in the title
+        if(hatOrder.size() > invRows*9) {
+            // If the GUI is just being opened, create the player's page index
+            playerGUIPage.putIfAbsent(player.getUniqueId(), 1);
+
+            currentPage = playerGUIPage.get(player.getUniqueId());
+            pages = (int) Math.ceil((double) hatOrder.size() / (invRows*9));
+            inv = Bukkit.createInventory(null, (invRows*9)+18, messageManager.getMessage("gui_title") + ChatColor.DARK_GRAY + " (" + currentPage + "/" + pages + ")");
+        }
+        else {
+            inv = Bukkit.createInventory(null, (invRows*9)+18, messageManager.getMessage("gui_title"));
+        }
 
         // Start items & make border items
         String configItem = main.getConfig().getString("border");
@@ -149,8 +181,33 @@ public class InventoryManager {
         // Display cosmetics
         int slot = 9;
         boolean hideHats = main.getConfig().getBoolean("hide_hats");
-        for(String hat : hatOrder) {
-            ItemStack GUIItem = new ItemStack(Main.hats.get(hat));
+
+        ItemStack GUIItem;
+
+        // If there are multiple pages, add next/prev page buttons
+        if(hatOrder.size() > invRows*9) {
+            GUIItem = new ItemStack(Material.ARROW);
+            ItemMeta GUIMeta = GUIItem.getItemMeta();
+            assert GUIMeta != null;
+
+            // If this is not the first page, add a previous page button
+            if(playerGUIPage.get(player.getUniqueId()) > 1) {
+                GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lPrevious Page"));
+                GUIItem.setItemMeta(GUIMeta);
+                inv.setItem((invRows+1)*9 + 3, GUIItem);
+            }
+
+            if(currentPage != pages) {
+                GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lNext Page"));
+                GUIItem.setItemMeta(GUIMeta);
+                inv.setItem((invRows+1)*9 + 5, GUIItem);
+            }
+        }
+
+        for(int i = (currentPage-1)*9; i < hatOrder.size(); i++) {
+            String hat = hatOrder.get(i);
+
+            GUIItem = new ItemStack(Main.hats.get(hat));
             NBTItem nbti = new NBTItem(GUIItem);
 
             // If hiding hats is enabled and the player doesn't
@@ -159,21 +216,8 @@ public class InventoryManager {
                 continue;
             }
 
+            // If there are no more open slots for hats, return the inventory
             if(slot-8 > invRows*9) {
-                GUIItem = new ItemStack(Material.ARROW);
-                ItemMeta GUIMeta = GUIItem.getItemMeta();
-                assert GUIMeta != null;
-
-                // If this is not the first page, add a previous page button
-                if(startingHatIndex.get(player.getUniqueId()) != null) {
-                    GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lPrevious Page"));
-                    GUIItem.setItemMeta(GUIMeta);
-                    inv.setItem((invRows+1)*9 + 3, GUIItem);
-                }
-
-                GUIMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&f&lNext Page"));
-                GUIItem.setItemMeta(GUIMeta);
-                inv.setItem((invRows+1)*9 + 5, GUIItem);
                 return inv;
             }
 
