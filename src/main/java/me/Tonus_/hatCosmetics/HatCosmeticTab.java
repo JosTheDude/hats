@@ -10,8 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 public class HatCosmeticTab implements TabCompleter {
+    Main main;
     List<String> arguments = new ArrayList<>();
     Set<String> hats = Main.hats.keySet();
+
+    public HatCosmeticTab(Main main) {
+        this.main = main;
+    }
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         if(arguments.isEmpty()) {
@@ -29,7 +34,10 @@ public class HatCosmeticTab implements TabCompleter {
             if(args[0].equalsIgnoreCase("equip")) {
                 if(args.length == 2) {
                     for(String a : hats) {
-                        if(a.toLowerCase().startsWith(args[1])) result.add(a);
+                        if(a.toLowerCase().startsWith(args[1])) {
+                            if(main.getConfig().getBoolean("hide_hats") && !sender.hasPermission("hatcosmetics.hat." + a)) continue;
+                            result.add(a);
+                        }
                     }
                     return result;
                 }

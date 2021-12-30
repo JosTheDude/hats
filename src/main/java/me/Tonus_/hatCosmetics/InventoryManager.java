@@ -36,6 +36,30 @@ public class InventoryManager {
         playerGUIPage.remove(uuid);
     }
 
+    // Removes the list of hat indexes for the given player
+    public void removePlayerHats(UUID uuid) { playerHats.remove(uuid); }
+
+    // Returns a list of hat indexes the given player has access to
+    private ArrayList<Integer> getPlayerHats(Player player) {
+        // Prepare new array of integers
+        ArrayList<Integer> playerHats = new ArrayList<>();
+
+        // Loop through all of the hats in order
+        for(int i = 0; i < hatOrder.size(); i++) {
+            // Initialize itemstack and its NBT data
+            String hatName = hatOrder.get(i);
+            ItemStack hatItem = new ItemStack(Main.hats.get(hatName));
+            NBTItem nbti = new NBTItem(hatItem);
+
+            // If the player has the permission found in the NBT data, add the index to the list
+            if(player.hasPermission(nbti.getString("Permission"))) {
+                playerHats.add(i);
+            }
+        }
+
+        return playerHats;
+    }
+
     public InventoryManager(Main main) {
         this.main = main;
         this.messageManager = main.getMessageManager();
@@ -102,12 +126,22 @@ public class InventoryManager {
 
     public Inventory openInv(Player player) {
         int invRows = main.getConfig().getInt("gui_rows");
+        boolean hideHats = main.getConfig().getBoolean("hide_hats");
+
+        int hatsLength;
+
+        // If hats are supposed to be hidden to the player, make a list of hats they have access to
+        if(hideHats) {
+            playerHats.put(player.getUniqueId(), getPlayerHats(player));
+            hatsLength = playerHats.get(player.getUniqueId()).size();
+        }
+        else {
+            hatsLength = hatOrder.size();
+        }
+
         if(invRows == -1) {
-            double autoRows = (double) hatOrder.size() / 9;
-            if(autoRows > 4) {
-                main.getLogger().warning("Not all of the hats will be able to fit in the GUI! Defaulting to 4 rows...");
-                autoRows = 4;
-            }
+            double autoRows = (double) hatsLength / 9;
+            autoRows = Math.min(autoRows, 4);
             invRows = (int) Math.ceil(autoRows);
         }
         else if(invRows < 1 || invRows > 4) {
@@ -120,12 +154,12 @@ public class InventoryManager {
         int pages = 1;
 
         // If there are multiple pages of hats, be sure to include the page number in the title
-        if(hatOrder.size() > invRows*9) {
+        if(hatsLength > invRows*9) {
             // If the GUI is just being opened, create the player's page index
             playerGUIPage.putIfAbsent(player.getUniqueId(), 1);
 
             currentPage = playerGUIPage.get(player.getUniqueId());
-            pages = (int) Math.ceil((double) hatOrder.size() / (invRows*9));
+            pages = (int) Math.ceil((double) hatsLength / (invRows*9));
             inv = Bukkit.createInventory(null, (invRows*9)+18, messageManager.getMessage("gui_title") + ChatColor.DARK_GRAY + " (" + currentPage + "/" + pages + ")");
         }
         else {
@@ -180,12 +214,11 @@ public class InventoryManager {
 
         // Display cosmetics
         int slot = 9;
-        boolean hideHats = main.getConfig().getBoolean("hide_hats");
 
         ItemStack GUIItem;
 
         // If there are multiple pages, add next/prev page buttons
-        if(hatOrder.size() > invRows*9) {
+        if(hatsLength > invRows*9) {
             GUIItem = new ItemStack(Material.ARROW);
             ItemMeta GUIMeta = GUIItem.getItemMeta();
             assert GUIMeta != null;
@@ -204,17 +237,19 @@ public class InventoryManager {
             }
         }
 
-        for(int i = (currentPage-1)*9; i < hatOrder.size(); i++) {
-            String hat = hatOrder.get(i);
+        for(int i = (currentPage-1)*9; i < hatsLength; i++) {
+            String hat;
+            // If hiding hats is enabled, get the list of hats from the list of hat integers
+            if(hideHats) {
+                hat = hatOrder.get(playerHats.get(player.getUniqueId()).get(i));
+            }
+            // Otherwise, just use the original list of hat strings
+            else {
+                hat = hatOrder.get(i);
+            }
 
             GUIItem = new ItemStack(Main.hats.get(hat));
             NBTItem nbti = new NBTItem(GUIItem);
-
-            // If hiding hats is enabled and the player doesn't
-            // have permission to the hat, skip it from being displayed
-            if(hideHats && !player.hasPermission(nbti.getString("Permission"))) {
-                continue;
-            }
 
             // If there are no more open slots for hats, return the inventory
             if(slot-8 > invRows*9) {

@@ -126,6 +126,7 @@ public class InventoryEvents implements Listener {
             Bukkit.getScheduler().runTaskLater(main, () -> {
                 if(!player.getOpenInventory().getTitle().contains(messageManager.getMessage("gui_title"))) {
                     inventoryManager.removePlayerPage(player.getUniqueId());
+                    inventoryManager.removePlayerHats(player.getUniqueId());
                 }
             }, 1L);
         }
