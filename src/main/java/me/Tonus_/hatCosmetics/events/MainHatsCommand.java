@@ -2,7 +2,7 @@ package me.Tonus_.hatCosmetics.events;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.Tonus_.hatCosmetics.Main;
-import me.Tonus_.hatCosmetics.MessageManager;
+import me.Tonus_.hatCosmetics.manager.MessageManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;

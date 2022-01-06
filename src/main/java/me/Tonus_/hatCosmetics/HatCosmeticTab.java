@@ -1,5 +1,6 @@
 package me.Tonus_.hatCosmetics;
 
+import me.Tonus_.hatCosmetics.manager.ConfigManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -10,12 +11,12 @@ import java.util.List;
 import java.util.Set;
 
 public class HatCosmeticTab implements TabCompleter {
-    Main main;
-    List<String> arguments = new ArrayList<>();
-    Set<String> hats = Main.hats.keySet();
+    private final ConfigManager configManager;
+    private final List<String> arguments = new ArrayList<>();
+    private final Set<String> hats = Main.hats.keySet();
 
     public HatCosmeticTab(Main main) {
-        this.main = main;
+        this.configManager = main.getConfigManager();
     }
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
@@ -35,7 +36,7 @@ public class HatCosmeticTab implements TabCompleter {
                 if(args.length == 2) {
                     for(String a : hats) {
                         if(a.toLowerCase().startsWith(args[1])) {
-                            if(main.getConfig().getBoolean("hide_hats") && !sender.hasPermission("hatcosmetics.hat." + a)) continue;
+                            if(configManager.hideHats && !sender.hasPermission("hatcosmetics.hat." + a)) continue;
                             result.add(a);
                         }
                     }

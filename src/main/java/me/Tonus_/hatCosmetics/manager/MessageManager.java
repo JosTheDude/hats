@@ -1,6 +1,7 @@
-package me.Tonus_.hatCosmetics;
+package me.Tonus_.hatCosmetics.manager;
 
-import org.bukkit.ChatColor;
+import me.Tonus_.hatCosmetics.Main;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,17 +12,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageManager {
     private final Main main;
     private FileConfiguration messagesConfig;
     private final FileConfiguration defaultMessagesConfig;
 
+    // Pattern for hex color codes
+    private final Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
+
     public MessageManager(Main main) {
         this.main = main;
         InputStream messagesStream = main.getClass().getResourceAsStream("/messages.yml");
         InputStreamReader streamReader = new InputStreamReader(messagesStream);
         defaultMessagesConfig = YamlConfiguration.loadConfiguration(streamReader);
+
+        createMessagesConfig();
     }
 
     public FileConfiguration getMessagesConfig() {
@@ -49,7 +57,7 @@ public class MessageManager {
             main.getLogger().warning("\"" + msgConfOption + "\" could not be found in messages.yml. Resorting to default value...");
         }
         assert msg != null;
-        return ChatColor.translateAlternateColorCodes('&', msg);
+        return formatMessage(msg);
     }
 
     public String getPlayerMessage(String msgConfOption, ItemStack hat) {
@@ -75,6 +83,17 @@ public class MessageManager {
                 msg = msg.replaceAll("\\{hat}", meta.getDisplayName());
             }
         }
-        return ChatColor.translateAlternateColorCodes('&', prefix + suffix + msg);
+        return formatMessage(prefix + suffix + msg);
+    }
+
+    // Formats the given message with color codes, including hex
+    public String formatMessage(String msg) {
+        Matcher match = pattern.matcher(msg);
+        while(match.find()) {
+            String code = msg.substring(match.start()+1, match.end());
+            msg = msg.replace('&' + code, ChatColor.of(code) + "");
+            match = pattern.matcher(msg);
+        }
+        return ChatColor.translateAlternateColorCodes('&', msg);
     }
 }

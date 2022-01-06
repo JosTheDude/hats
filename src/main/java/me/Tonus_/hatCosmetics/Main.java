@@ -2,6 +2,10 @@ package me.Tonus_.hatCosmetics;
 
 import me.Tonus_.hatCosmetics.events.InventoryEvents;
 import me.Tonus_.hatCosmetics.events.MainHatsCommand;
+import me.Tonus_.hatCosmetics.manager.ConfigManager;
+import me.Tonus_.hatCosmetics.manager.InventoryManager;
+import me.Tonus_.hatCosmetics.manager.MessageManager;
+import me.Tonus_.hatCosmetics.manager.UpdateManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,6 +13,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import sun.security.krb5.Config;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -25,18 +30,32 @@ public class Main extends JavaPlugin implements Listener {
 
     public MessageManager getMessageManager() { return messageManager; }
 
+    private ConfigManager configManager;
+
+    public ConfigManager getConfigManager() { return configManager; }
+
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         this.saveDefaultConfig();
+        configManager = new ConfigManager(this);
         messageManager = new MessageManager(this);
-        messageManager.createMessagesConfig();
         inventoryManager = new InventoryManager(this);
-        inventoryManager.initHats();
         getServer().getPluginManager().registerEvents(new InventoryEvents(this), this);
         Objects.requireNonNull(getCommand("hatcosmetics")).setTabCompleter(new HatCosmeticTab(this));
         Objects.requireNonNull(getCommand("hatcosmetics")).setExecutor(new MainHatsCommand(this));
         new Metrics(this, 11075);
+
+        // Check for new updates
+        new UpdateManager(this, 83111).getSpigotVersion(version -> {
+            if(this.getDescription().getVersion().equals(version)) {
+                getLogger().info("Server is running the latest version available!");
+            }
+            else {
+                getLogger().info("An update for HatCosmetics (" + version + ") is available at:");
+                getLogger().info("https://www.spigotmc.org/resources/hatcosmetics.83111/");
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,7 @@
-package me.Tonus_.hatCosmetics;
+package me.Tonus_.hatCosmetics.manager;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
+import me.Tonus_.hatCosmetics.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import java.util.*;
 
 public class InventoryManager {
     private final Main main;
+    private final ConfigManager configManager;
     private final MessageManager messageManager;
     private final ArrayList<String> hatOrder = new ArrayList<>();
     private final HashMap<UUID, ArrayList<Integer>> playerHats = new HashMap<>();
@@ -63,6 +65,9 @@ public class InventoryManager {
     public InventoryManager(Main main) {
         this.main = main;
         this.messageManager = main.getMessageManager();
+        this.configManager = main.getConfigManager();
+
+        initHats();
     }
 
     public void initHats() {
@@ -72,16 +77,7 @@ public class InventoryManager {
             main.getLogger().severe("The hats section of the config is missing! Delete your file and restart the server to regenerate.");
             return;
         }
-        String configItem = main.getConfig().getString("item");
-        if(configItem == null) {
-            main.getLogger().warning("An item was not provided in the config!");
-            return;
-        }
-        Material material = Material.matchMaterial(configItem);
-        if(material == null) {
-            main.getLogger().warning("The item '" + configItem + "' is not a material! Please check Spigot-API materials.");
-            return;
-        }
+        Material material = configManager.item;
 
         for(String cosmetics : cosmeticsSection.getKeys(false)) {
             ItemStack hatItem;
@@ -102,7 +98,7 @@ public class InventoryManager {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Hat Cosmetic");
             for(String descText : main.getConfig().getStringList("hats." + cosmetics + ".description")) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', descText));
+                lore.add(messageManager.formatMessage(descText));
             }
             lore.add(" ");
             lore.add(messageManager.getMessage("hat_equip"));
@@ -111,10 +107,10 @@ public class InventoryManager {
             hatMeta.setCustomModelData(main.getConfig().getInt("hats." + cosmetics + ".data"));
             String name = main.getConfig().getString("hats." + cosmetics + ".name");
             if(name == null) {
-                main.getLogger().warning("The item '" + configItem + "' does not have a name defined!");
+                main.getLogger().warning("The item '" + cosmetics + "' does not have a name defined!");
                 continue;
             }
-            hatMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+            hatMeta.setDisplayName(messageManager.formatMessage(name));
             hatItem.setItemMeta(hatMeta);
             NBTItem nbti = new NBTItem(hatItem);
             nbti.setString("Permission", "hatcosmetics.hat." + cosmetics);
@@ -125,8 +121,8 @@ public class InventoryManager {
     }
 
     public Inventory openInv(Player player) {
-        int invRows = main.getConfig().getInt("gui_rows");
-        boolean hideHats = main.getConfig().getBoolean("hide_hats");
+        int invRows = configManager.guiRows;
+        boolean hideHats = configManager.hideHats;
 
         int hatsLength;
 
@@ -167,16 +163,7 @@ public class InventoryManager {
         }
 
         // Start items & make border items
-        String configItem = main.getConfig().getString("border");
-        if(configItem == null) {
-            main.getLogger().warning("A border was not provided in the config!");
-            return null;
-        }
-        Material material = Material.matchMaterial(configItem);
-        if(material == null) {
-            main.getLogger().warning("The item '" + configItem + "' is not a material! Please check Spigot-API materials.");
-            return null;
-        }
+        Material material = configManager.border;
         ItemStack item = new ItemStack(material);
         ItemMeta meta;
 

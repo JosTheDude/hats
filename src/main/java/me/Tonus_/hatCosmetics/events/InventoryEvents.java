@@ -1,9 +1,9 @@
 package me.Tonus_.hatCosmetics.events;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
-import me.Tonus_.hatCosmetics.InventoryManager;
+import me.Tonus_.hatCosmetics.manager.InventoryManager;
 import me.Tonus_.hatCosmetics.Main;
-import me.Tonus_.hatCosmetics.MessageManager;
+import me.Tonus_.hatCosmetics.manager.MessageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
