@@ -13,7 +13,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import sun.security.krb5.Config;
 
 import java.util.HashMap;
 import java.util.Objects;

@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'de.tr7zw:item-nbt-api:2.9.0-SNAPSHOT'
+    implementation 'de.tr7zw:item-nbt-api:2.9.2-SNAPSHOT'
     implementation 'org.jetbrains:annotations:20.1.0'
     compileOnly 'org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT'
 }
