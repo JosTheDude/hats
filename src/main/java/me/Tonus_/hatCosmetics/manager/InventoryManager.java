@@ -224,7 +224,7 @@ public class InventoryManager {
             }
         }
 
-        for(int i = (currentPage-1)*9; i < hatsLength; i++) {
+        for(int i = (currentPage-1)*9*invRows; i < hatsLength; i++) {
             String hat;
             // If hiding hats is enabled, get the list of hats from the list of hat integers
             if(hideHats) {
