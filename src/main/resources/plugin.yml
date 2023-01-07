@@ -2,7 +2,7 @@ main: me.jos.hats.Main
 name: Hats
 version: 1.0.0
 author: Jos
-api-version: 1.16
+api-version: 1.19
 
 commands:
   hatCosmetics:
