@@ -1,12 +1,12 @@
-main: me.Tonus_.hatCosmetics.Main
-name: HatCosmetics
-version: 1.2.0-b4
-author: Tonus_
+main: me.jos.hats.Main
+name: Hats
+version: 1.0.0
+author: Jos
 api-version: 1.16
 
 commands:
   hatCosmetics:
-    description: Primary command for hats.
+    description: Primary hats command
     aliases: [hats]
 
 permissions:

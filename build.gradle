@@ -23,12 +23,12 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
 }
 
-group = 'me.Tonus_'
-version = '1.2.0-b4'
+group = 'me.jos'
+version = '1.0.0'
 sourceCompatibility = '1.8'
 
 shadowJar {
     minimize()
     archiveClassifier.set("")
-    relocate('de.tr7zw', 'me.Tonus_.hatCosmetics.libs.nbt-api')
+    relocate('de.tr7zw', 'me.jos.hatCosmetics.libs.nbt-api')
 }
