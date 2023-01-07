@@ -26,7 +26,7 @@ public class MainHatsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args) {
-        if(label.equalsIgnoreCase("hats")) {
+        if(label.equalsIgnoreCase("hats") || label.equalsIgnoreCase("hats:hats")) {
             if(args.length == 0) {
                 if(!(sender instanceof Player)) {
                     sender.sendMessage("You cannot do this in console!");
@@ -42,12 +42,12 @@ public class MainHatsCommand implements CommandExecutor {
             } else {
                 if(args[0].equalsIgnoreCase("help")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                            "&8&m------------&8[ &3&lHats &8]&m------------\n"
-                                    + "&f/hats&7: Opens hat GUI\n"
-                                    + "&f/hats equip <hat> &8[player]&7: Equips specified hat\n"
-                                    + "&f/hats unequip &8[player]&7: Unequips current hat\n"
-                                    + "&f/hats help&7: Displays this text"));
-                    if(sender.hasPermission("hatcosmetics.reload")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f/hats reload&7: Reloads plugin"));
+                            "&2Hats &8| &7Fancy Schmany Hat You Got There\n\n"
+                                    + "&f/hats&7 - Opens hat GUI\n"
+                                    + "&f/hats equip <hat> &8[player]&7 - Equips specified hat\n"
+                                    + "&f/hats unequip &8[player]&7 - Unequips current hat\n"
+                                    + "&f/hats help&7 - Displays this text"));
+                    if(sender.hasPermission("hats.reload")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f/hats reload&7: Reloads plugin"));
                 }
                 else if(args[0].equalsIgnoreCase("equip")) {
                     // Check if a hat is specified and if it exists
@@ -60,7 +60,7 @@ public class MainHatsCommand implements CommandExecutor {
                     }
                     Player player;
                     if(args.length > 2) {
-                        if(!sender.hasPermission("hatcosmetics.equip.other")) {
+                        if(!sender.hasPermission("hats.equip.other")) {
                             sender.sendMessage(messageManager.getPlayerMessage("no_permission", null));
                             return true;
                         }
@@ -113,7 +113,7 @@ public class MainHatsCommand implements CommandExecutor {
                 else if(args[0].equalsIgnoreCase("unequip")) {
                     Player player;
                     if(args.length > 1) {
-                        if(!sender.hasPermission("hatcosmetics.unequip.other")) {
+                        if(!sender.hasPermission("hats.unequip.other")) {
                             sender.sendMessage(messageManager.getPlayerMessage("no_permission", null));
                             return true;
                         }
@@ -147,7 +147,7 @@ public class MainHatsCommand implements CommandExecutor {
                     else player.sendMessage(messageManager.getPlayerMessage("no_hat", null));
                 }
                 else if(args[0].equalsIgnoreCase("reload")) {
-                    if(sender.hasPermission("hatcosmetics.reload")) {
+                    if(sender.hasPermission("hats.reload")) {
                         main.saveDefaultConfig();
                         main.reloadConfig();
                         messageManager.createMessagesConfig();

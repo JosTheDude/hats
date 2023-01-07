@@ -1,0 +1,19 @@
+# List of items: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# Default item used for all hats:
+item: GLASS
+# Item used to border the hats in the GUI:
+border: GRAY_STAINED_GLASS_PANE
+
+# The number of hat rows in the GUI (must be between 1 and 4, or -1 for auto)
+# Only for actual hats section of the GUI
+gui_rows: -1
+hide_hats: false # If set to true, players will only see hats they have access to in the GUI and equip command
+
+hats:
+  # This is where you add your hats
+  exampleHat:             # The name used for /hats equip and the hat's permission, for this case, hats.hat.exampleHat
+    item: GLASS  # (OPTIONAL) Only use if your hat uses a different item from the rest
+    name: "&#79fb1fE&#6efb35x&#62fb4ca&#57fc62m&#4cfc78p&#40fc8fl&#35fca5e &#2afdbbH&#1efdd2a&#13fde8t" # The name displayed on the item
+    description:       # (OPTIONAL) Adds list of text underneath the "Hat Cosmetic" line
+      - ""
+      - "&fAn example hat!"
