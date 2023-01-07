@@ -1,6 +1,5 @@
 **Commands**
 
-- Alias for /hats: /hatcosmetics
 - /hats (Opens GUI for hat selection)
   - hatcosmetics.hat.<hat> (Access to specified hat)
 - /hats help (Opens command list for plugin)
