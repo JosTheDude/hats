@@ -1,6 +1,6 @@
 ## Hats
 
-Hats is a simple plugin that adds a hatting system to your server! It has a hat gui for hat selection, permissions for each hat, as well as a simple and easy to configure config.yml and configurable message!
+Hats is a simple plugin that adds a hatting system to your server! It has a hat gui for hat selection, permissions for each hat, as well as a simple and easy to configure config.yml and configurable messages!
 
 **Commands**
 
