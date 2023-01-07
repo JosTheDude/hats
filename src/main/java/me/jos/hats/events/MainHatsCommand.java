@@ -26,7 +26,7 @@ public class MainHatsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args) {
-        if(label.equalsIgnoreCase("hatcosmetics") || label.equalsIgnoreCase("hats")) {
+        if(label.equalsIgnoreCase("hats")) {
             if(args.length == 0) {
                 if(!(sender instanceof Player)) {
                     sender.sendMessage("You cannot do this in console!");

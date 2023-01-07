@@ -5,9 +5,8 @@ author: Jos
 api-version: 1.19
 
 commands:
-  hatCosmetics:
-    description: Primary hats command
-    aliases: [hats]
+  hats:
+    description: Hats Command
 
 permissions:
   hatcosmetics.reload:

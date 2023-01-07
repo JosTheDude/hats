@@ -39,8 +39,8 @@ public class Main extends JavaPlugin implements Listener {
         messageManager = new me.jos.hats.manager.MessageManager(this);
         inventoryManager = new InventoryManager(this);
         getServer().getPluginManager().registerEvents(new InventoryEvents(this), this);
-        Objects.requireNonNull(getCommand("hatcosmetics")).setTabCompleter(new me.jos.hats.HatCosmeticTab(this));
-        Objects.requireNonNull(getCommand("hatcosmetics")).setExecutor(new MainHatsCommand(this));
+        Objects.requireNonNull(getCommand("hats")).setTabCompleter(new me.jos.hats.HatCosmeticTab(this));
+        Objects.requireNonNull(getCommand("hats")).setExecutor(new MainHatsCommand(this));
     }
 
     @Override

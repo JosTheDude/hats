@@ -36,7 +36,7 @@ public class HatCosmeticTab implements TabCompleter {
                 if(args.length == 2) {
                     for(String a : hats) {
                         if(a.toLowerCase().startsWith(args[1])) {
-                            if(configManager.hideHats && !sender.hasPermission("hatcosmetics.hat." + a)) continue;
+                            if(configManager.hideHats && !sender.hasPermission("hats.hat." + a)) continue;
                             result.add(a);
                         }
                     }

@@ -18,9 +18,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'de.tr7zw:item-nbt-api:2.10.0'
+    implementation 'de.tr7zw:item-nbt-api:2.11.1'
     implementation 'org.jetbrains:annotations:20.1.0'
-    compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT'
 }
 
 group = 'me.jos'
@@ -30,5 +30,9 @@ sourceCompatibility = '1.8'
 shadowJar {
     minimize()
     archiveClassifier.set("")
-    relocate('de.tr7zw', 'me.jos.hatCosmetics.libs.nbt-api')
+    relocate('de.tr7zw', 'me.jos.hats.libs.nbt-api')
+}
+
+build {
+    dependsOn(shadowJar)
 }
